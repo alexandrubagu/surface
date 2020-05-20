@@ -1,8 +1,19 @@
 defmodule Surface.Components.Form do
+  @moduledoc """
+  Generates a form.
+
+  Provides a wrapper for `Phoenix.HTML.Form.form_for/3`. Additionally,
+  adds the form instance that is returned by `form_for/3` into the context,
+  making it available to any child input.
+
+  All options passed via `opts` will be sent to `form_for/3`, `for`
+  and `action` can be set directly and will override anything in `opts`.
+
+  """
+
   use Surface.Component
 
   import Phoenix.HTML.Form
-
   alias Surface.Components.Raw
 
   @doc "Atom or changeset to inform the form data"
@@ -27,7 +38,12 @@ defmodule Surface.Components.Form do
   context set form, :form
 
   def init_context(assigns) do
-    form = form_for(assigns.for, assigns.action, assigns.opts)
+    opts =
+      assigns.opts ++
+        event_to_opts(assigns.change, :phx_change) ++
+        event_to_opts(assigns.submit, :phx_submit)
+
+    form = form_for(assigns.for, assigns.action, opts)
     {:ok, form: form}
   end
 
